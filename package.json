@@ -1,0 +1,61 @@
+{
+  "name": "decentralized-identity",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Decentralized Identity Verification Pipeline - SIWE to Web2 session bridge",
+  "workspaces": [
+    "apps/*",
+    "contracts"
+  ],
+  "scripts": {
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,css,mjs}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md,css,mjs}\"",
+    "lint": "npm run lint --workspaces --if-present",
+    "gen:secret": "node -e \"console.log(require('crypto').randomBytes(48).toString('base64url'))\"",
+    "chain": "npm run chain --workspace contracts",
+    "compile": "npm run compile --workspace contracts",
+    "test:contracts": "npm run test --workspace contracts",
+    "deploy:contract": "npm run deploy --workspace contracts",
+    "seed:identities": "npm run seed --workspace contracts",
+    "db:migrate": "prisma migrate dev --schema prisma/schema.prisma",
+    "db:deploy": "prisma migrate deploy --schema prisma/schema.prisma",
+    "db:generate": "prisma generate --schema prisma/schema.prisma",
+    "db:studio": "prisma studio --schema prisma/schema.prisma",
+    "dev:backend": "npm run dev --workspace apps/backend",
+    "dev:frontend": "npm run dev --workspace apps/frontend",
+    "dev:docs": "npm run dev --workspace apps/docs",
+    "dev:all": "./start.sh",
+    "start:all": "./start.sh --prod",
+    "build:backend": "npm run build --workspace apps/backend",
+    "build:frontend": "npm run build --workspace apps/frontend",
+    "build:docs": "npm run build --workspace apps/docs",
+    "preview:docs": "npm run preview --workspace apps/docs",
+    "test:backend": "npm run test --workspace apps/backend",
+    "test:frontend": "npm run test --workspace apps/frontend",
+    "test:docs": "npm run test --workspace apps/docs",
+    "test": "npm run test:contracts && npm run test:backend && npm run test:frontend && npm run test:docs",
+    "smoke": "node scripts/smoke-auth.js",
+    "test:e2e": "npm run test:e2e --workspace apps/frontend",
+    "setup:env": "node scripts/generate-env.js"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "prisma": "^6.5.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "allowScripts": {
+    "bufferutil@4.0.5": true,
+    "bufferutil@4.0.7": true,
+    "esbuild@0.28.2": true,
+    "keccak@3.0.4": true,
+    "prisma@6.19.3": true,
+    "secp256k1@4.0.5": true,
+    "unrs-resolver@1.12.2": true,
+    "utf-8-validate@5.0.7": true,
+    "utf-8-validate@6.0.3": true,
+    "@prisma/client@6.19.3": true,
+    "@prisma/engines@6.19.3": true
+  }
+}

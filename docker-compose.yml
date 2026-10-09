@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: divp-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: divp
+      POSTGRES_PASSWORD: divp_password
+      POSTGRES_DB: decentralized_identity
+    ports:
+      - "5432:5432"
+    volumes:
+      - divp_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U divp -d decentralized_identity"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  divp_pgdata:
