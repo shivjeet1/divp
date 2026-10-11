@@ -1,0 +1,26 @@
+{
+  "name": "@divp/contracts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "chain": "ganache --server.port 7545 --chain.chainId 1337 --wallet.mnemonic \"test test test test test test test test test test test junk\" --wallet.totalAccounts 10 --miner.blockGasLimit 30000000",
+    "deploy": "hardhat run scripts/deploy.ts --network ganache",
+    "seed": "hardhat run scripts/seed-identities.ts --network ganache",
+    "node": "hardhat node",
+    "lint": "prettier --check \"**/*.sol\" || true"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@types/chai": "^4.3.20",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.13.10",
+    "dotenv": "^16.4.7",
+    "ethers": "^6.13.5",
+    "ganache": "^7.9.2",
+    "hardhat": "^2.22.19",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  }
+}
