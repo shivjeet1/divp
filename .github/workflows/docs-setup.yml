@@ -1,0 +1,73 @@
+name: Deploy docs
+
+# Builds and publishes ONLY the standalone documentation portal (apps/docs)
+# to GitHub Pages. Nothing else in the monorepo is built or deployed.
+#
+# One-time setup: repository Settings → Pages → Build and deployment →
+# Source = "GitHub Actions". (The Pages URL is reported by the deploy job.)
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'apps/docs/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/docs-setup.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Exposes base_path so the Vite build uses the right asset prefix for
+      # project pages (/<repo>/) without touching vite.config.ts — the dev
+      # server and local builds keep base "/".
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test docs
+        run: npm run test:docs
+
+      - name: Build docs
+        run: npm run build --workspace apps/docs -- --base="${{ steps.pages.outputs.base_path }}/"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/docs/dist
+
+  deploy:
+    name: Deploy to Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
