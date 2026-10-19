@@ -1,14 +1,75 @@
+/* ------------------------------------------------------------------ *
+ * DIVP app theme — 3-layer design tokens (DTCG-style).
+ *
+ * Primitive layer: raw zinc ramp + single accent + status hues.
+ * Semantic layer:  surface / text / border / status roles (dark theme).
+ * Component layer: .card .kv .badge .steps .alert etc. consume tokens only.
+ *
+ * Language matches the docs portal: near-black canvas, zinc text ramp,
+ * hairline borders, 2px radius, monospace accents for data values.
+ * Emphasis comes from weight, contrast and border intensity; the one
+ * accent (blue) is reserved for focus rings and the active pipeline step.
+ * ------------------------------------------------------------------ */
+
 :root {
-  --bg: #0b0e14;
-  --panel: #131824;
-  --panel-2: #1a2130;
-  --border: #273043;
-  --text: #e6ebf4;
-  --muted: #8b96ab;
-  --accent: #4f8cff;
-  --ok: #2ecc71;
-  --warn: #f1c40f;
-  --err: #e74c3c;
+  /* ---- primitives ---- */
+  --zinc-50: #fafafa;
+  --zinc-100: #f4f4f5;
+  --zinc-200: #e4e4e7;
+  --zinc-300: #d4d4d8;
+  --zinc-400: #a1a1aa;
+  --zinc-500: #71717a;
+  --zinc-600: #52525b;
+  --zinc-800: #27272a;
+  --zinc-850: #1d1d21;
+  --zinc-900: #18181b;
+  --zinc-925: #131316;
+  --zinc-950: #09090b;
+
+  --blue-accent: #4f8cff;
+  --green-status: #4ade80;
+  --yellow-status: #facc15;
+  --red-status: #f87171;
+
+  /* ---- semantic: surfaces ---- */
+  --bg: var(--zinc-950);
+  --panel: var(--zinc-900);
+  --panel-raised: var(--zinc-925);
+  --overlay-hover: var(--zinc-850);
+
+  /* ---- semantic: text ---- */
+  --text: var(--zinc-100);
+  --text-strong: var(--zinc-50);
+  --muted: var(--zinc-400);
+  /* AA-raised dim: pure zinc-500 computes 3.67-4.12:1 on this canvas/panel;
+     #82828c holds >= 4.5:1 against both surfaces. */
+  --dim: #82828c;
+
+  /* ---- semantic: borders, radius ---- */
+  --border: var(--zinc-800);
+  --border-dim: var(--zinc-850);
+  --border-hover: var(--zinc-600);
+  --radius: 2px;
+
+  /* ---- semantic: statuses + accent ---- */
+  --accent: var(--blue-accent);
+  --ok: var(--green-status);
+  --warn: var(--yellow-status);
+  --err: var(--red-status);
+  --ok-soft: rgba(74, 222, 128, 0.08);
+  --warn-soft: rgba(250, 204, 21, 0.07);
+  --err-soft: rgba(248, 113, 113, 0.08);
+  --err-text: #fecaca;
+
+  /* ---- type scale ---- */
+  --fs-display: 1.375rem; /* 22px page title */
+  --fs-h2: 0.8125rem; /* 13px card header */
+  --fs-body: 0.875rem; /* 14px body / rows */
+  --fs-small: 0.8125rem; /* 13px hints, steps */
+  --fs-fine: 0.75rem; /* 12px badges, footer */
+
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
 * {
@@ -21,14 +82,14 @@ body {
   padding: 0;
   background: var(--bg);
   color: var(--text);
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: var(--sans);
+  font-size: 15px;
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--zinc-800);
 }
 
 main {
@@ -36,6 +97,24 @@ main {
   margin: 0 auto;
   padding: 32px 20px 64px;
 }
+
+/* ---- global focus, motion discipline ------------------------------- */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* ---- header -------------------------------------------------------- */
 
 header.app {
   display: flex;
@@ -47,13 +126,16 @@ header.app {
 }
 
 header.app h1 {
-  font-size: 22px;
+  font-size: var(--fs-display);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--text-strong);
   margin: 0;
 }
 
 header.app .sub {
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--fs-small);
 }
 
 .header-actions {
@@ -62,6 +144,8 @@ header.app .sub {
   gap: 12px;
   flex-wrap: wrap;
 }
+
+/* ---- cards + grid --------------------------------------------------- */
 
 .grid {
   display: grid;
@@ -72,124 +156,195 @@ header.app .sub {
 .card {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   padding: 18px;
+  min-width: 0;
 }
 
 .card h2 {
   margin: 0 0 12px;
-  font-size: 15px;
+  font-size: var(--fs-h2);
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   color: var(--muted);
 }
+
+.card h2 .badge {
+  margin-left: 8px;
+}
+
+/* ---- key/value rows ------------------------------------------------- */
 
 .kv {
   display: flex;
   justify-content: space-between;
   gap: 12px;
   padding: 6px 0;
-  font-size: 14px;
-  border-bottom: 1px dashed var(--border);
+  font-size: var(--fs-body);
+  border-bottom: 1px solid var(--border-dim);
 }
 
-.kv:last-child {
+.kv:last-of-type {
   border-bottom: none;
 }
 
 .kv .k {
   color: var(--muted);
+  flex-shrink: 0;
 }
 
 .kv .v {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--mono);
+  color: var(--text);
   text-align: right;
   word-break: break-all;
+  min-width: 0;
 }
+
+/* ---- badges ---------------------------------------------------------- */
 
 .badge {
   display: inline-block;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 12px;
+  padding: 2px 8px;
+  font-size: var(--fs-fine);
   font-weight: 600;
+  font-family: var(--mono);
   border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
 }
 
 .badge.ok {
   color: var(--ok);
   border-color: var(--ok);
 }
+
 .badge.warn {
   color: var(--warn);
   border-color: var(--warn);
 }
+
 .badge.err {
   color: var(--err);
   border-color: var(--err);
 }
+
 .badge.info {
   color: var(--accent);
   border-color: var(--accent);
 }
 
+/* ---- buttons --------------------------------------------------------- */
+
 button {
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-size: 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-size: var(--fs-body);
   font-weight: 600;
+  font-family: var(--sans);
+  background: var(--zinc-50);
+  color: var(--zinc-950);
   cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+button:hover {
+  background: var(--zinc-100);
+}
+
+button:active {
+  transform: scale(0.98);
 }
 
 button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+  transform: none;
 }
 
 button.secondary {
-  background: var(--panel-2);
-  border: 1px solid var(--border);
+  background: transparent;
+  border-color: var(--border);
   color: var(--text);
 }
 
-button.danger {
-  background: var(--err);
+button.secondary:hover {
+  background: var(--panel-raised);
+  border-color: var(--border-hover);
 }
 
-button + button {
-  margin-left: 8px;
+button.danger {
+  background: transparent;
+  border-color: var(--err);
+  color: var(--err);
 }
+
+button.danger:hover {
+  background: var(--err-soft);
+}
+
+/* Kept for compatibility with row layouts that used margin-left. */
+button + button {
+  margin-left: 0;
+}
+
+/* ---- alerts ----------------------------------------------------------- */
 
 .alert {
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 10px 14px;
-  font-size: 14px;
+  font-size: var(--fs-body);
   margin-top: 12px;
   white-space: pre-wrap;
   word-break: break-word;
+  border: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .alert.error {
-  background: rgba(231, 76, 60, 0.12);
-  border: 1px solid var(--err);
-  color: #ffb3ab;
+  background: var(--err-soft);
+  border-color: var(--err);
+  color: var(--err-text);
 }
 
 .alert.notice {
-  background: rgba(46, 204, 113, 0.1);
-  border: 1px solid var(--ok);
-  color: #a9f0c6;
+  background: var(--ok-soft);
+  border-color: var(--ok);
+  color: var(--text);
 }
+
+.alert-dismiss {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0 2px;
+  font-size: var(--fs-fine);
+  flex-shrink: 0;
+}
+
+.alert-dismiss:hover {
+  color: var(--text);
+  background: transparent;
+}
+
+/* ---- pipeline steps ---------------------------------------------------- */
 
 .steps {
   list-style: none;
   margin: 8px 0 0;
   padding: 0;
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--muted);
+  font-family: var(--mono);
 }
 
 .steps li {
@@ -202,12 +357,14 @@ button + button {
 }
 
 .steps li.done {
-  color: var(--ok);
+  color: var(--dim);
 }
+
+/* ---- hints, forms, tables ---------------------------------------------- */
 
 .hint {
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--fs-small);
   margin-top: 10px;
 }
 
@@ -215,25 +372,50 @@ table.identities {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--mono);
 }
 
 table.identities th,
 table.identities td {
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-dim);
   padding: 6px 8px;
   text-align: left;
 }
 
+table.identities th {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+table.identities td.actions {
+  white-space: nowrap;
+}
+
 input,
 select {
-  background: var(--panel-2);
+  background: var(--panel-raised);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius);
   padding: 8px;
-  font-size: 13px;
+  font-size: var(--fs-body);
+  font-family: var(--mono);
   width: 100%;
+}
+
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.field-label {
+  display: block;
+  color: var(--muted);
+  font-size: var(--fs-fine);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
 }
 
 .row {
@@ -243,10 +425,70 @@ select {
   align-items: center;
 }
 
+.row > input {
+  flex: 1;
+  min-width: 0;
+}
+
+.row > select {
+  width: auto;
+}
+
+/* ---- footer -------------------------------------------------------------- */
+
 footer.app {
   margin-top: 32px;
-  color: var(--muted);
-  font-size: 12px;
+  color: var(--dim);
+  font-size: var(--fs-fine);
   border-top: 1px solid var(--border);
   padding-top: 16px;
+  line-height: 1.6;
+}
+
+/* ---- layout helpers --------------------------------------------------- */
+
+.cta {
+  margin-top: 14px;
+}
+
+.card-below {
+  margin-top: 16px;
+}
+
+/* ---- responsive: explicit single-column collapse -------------------------- */
+
+@media (max-width: 639px) {
+  main {
+    padding: 20px 16px 48px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  header.app h1 {
+    font-size: 1.25rem;
+  }
+
+  .kv {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .kv .v {
+    text-align: left;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  .row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .row > select {
+    width: 100%;
+  }
 }

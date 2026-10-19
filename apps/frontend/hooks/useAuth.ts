@@ -11,6 +11,7 @@ import {
   onChainChanged,
   personalSign,
   requestAccounts,
+  switchEthereumChain,
 } from '@/lib/ethereum';
 import { buildSiweMessage } from '@/lib/siwe';
 import type { AuthStatus, BackendConfig, SessionInfo } from '@/types';
@@ -361,5 +362,34 @@ export function useAuth() {
 
   const dismissError = useCallback(() => patch({ error: null, notice: null }), [patch]);
 
-  return { ...state, connect, signIn, register, logout, dismissError };
+  /**
+   * Asks MetaMask to switch to the chain the backend expects. On success the
+   * wallet's `chainChanged` event drives the state machine back towards
+   * `connected`; failures are surfaced in the auth error message.
+   */
+  const switchNetwork = useCallback(async () => {
+    const provider = getProvider();
+    if (!provider || !state.config) {
+      patch({ error: 'Connect your wallet first.' });
+      return;
+    }
+    try {
+      await switchEthereumChain(provider, state.config.chainId);
+      patch({ notice: 'Switch request sent - confirm the network in your wallet.' });
+    } catch (error) {
+      patch({ error: describeError(error) });
+    }
+  }, [patch, state.config]);
+
+  return { ...state, connect, signIn, register, logout, switchNetwork, dismissError };
 }
+
+export type AuthApi = ReturnType<typeof useAuth>;
+
+/** Statuses where a sign-in or registration flow is in flight. */
+export const AUTH_BUSY_STATUSES: AuthStatus[] = [
+  'requesting_nonce',
+  'preparing_signature',
+  'waiting_for_signature',
+  'verifying',
+];

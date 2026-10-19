@@ -1,8 +1,12 @@
 /** Minimal EIP-1193 provider surface used by this app. */
 export interface Eip1193Provider {
   request(args: { method: string; params?: unknown[] | object }): Promise<unknown>;
-  on?(event: string, handler: (...args: never[]) => void): void;
-  removeListener?(event: string, handler: (...args: never[]) => void): void;
+  on?(event: 'accountsChanged', handler: (accounts: string[]) => void): void;
+  on?(event: 'chainChanged', handler: (chainId: string) => void): void;
+  on?(event: string, handler: (...args: unknown[]) => void): void;
+  removeListener?(event: 'accountsChanged', handler: (accounts: string[]) => void): void;
+  removeListener?(event: 'chainChanged', handler: (chainId: string) => void): void;
+  removeListener?(event: string, handler: (...args: unknown[]) => void): void;
   isMetaMask?: boolean;
 }
 
@@ -39,14 +43,25 @@ export async function personalSign(
   })) as string;
 }
 
+/** Asks the wallet to switch to a decimal chain id (PRD expected-network fix). */
+export async function switchEthereumChain(
+  provider: Eip1193Provider,
+  chainId: number,
+): Promise<void> {
+  await provider.request({
+    method: 'wallet_switchEthereumChain',
+    params: [{ chainId: `0x${chainId.toString(16)}` }],
+  });
+}
+
 export function onAccountsChanged(provider: Eip1193Provider, cb: (accounts: string[]) => void) {
-  provider.on?.('accountsChanged', cb as never);
-  return () => provider.removeListener?.('accountsChanged', cb as never);
+  provider.on?.('accountsChanged', cb);
+  return () => provider.removeListener?.('accountsChanged', cb);
 }
 
 export function onChainChanged(provider: Eip1193Provider, cb: (chainIdHex: string) => void) {
-  provider.on?.('chainChanged', cb as never);
-  return () => provider.removeListener?.('chainChanged', cb as never);
+  provider.on?.('chainChanged', cb);
+  return () => provider.removeListener?.('chainChanged', cb);
 }
 
 /** Extracts a human-readable message from provider/backend errors. */

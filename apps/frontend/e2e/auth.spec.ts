@@ -1,6 +1,8 @@
 import { expect, Page, test } from '@playwright/test';
 import { ACCOUNT, connectRandomWallet, installProvider, TestAccount } from './provider';
 
+const BACKEND = 'http://localhost:4000';
+
 /**
  * Browser-level E2E of the full pipeline:
  *   MetaMask connect → nonce → SIWE signature → on-chain verification →
@@ -36,13 +38,11 @@ test.describe('full authentication pipeline (browser)', () => {
       ACCOUNT.USER_1.addressChecksummed,
     );
 
-    // Role gate: USER is forbidden from the admin endpoint
-    await page.getByTestId('call-admin').click();
-    await expect(
-      page
-        .locator('[data-testid="auth-notice"], .alert.error', { hasText: /does not permit/i })
-        .first(),
-    ).toBeVisible();
+    // Role gate: USER is forbidden from the admin endpoint (server-side check,
+    // replayed through the browser session cookie)
+    const admin = await page.request.get(`${BACKEND}/api/protected/admin`);
+    expect(admin.status()).toBe(403);
+    expect((await admin.json()).message).toMatch(/does not permit/i);
 
     // Logout revokes the server session and clears the cookie
     await page.getByTestId('logout-button').click();
@@ -56,23 +56,24 @@ test.describe('full authentication pipeline (browser)', () => {
     await installProvider(page, ACCOUNT.OPERATOR_2);
     await authenticated(page, ACCOUNT.OPERATOR_2);
 
-    await page.getByTestId('call-operator').click();
-    await expect(page.locator('[data-testid="protected-card"] .alert.notice')).toContainText(
-      'Operator-level resource accessed.',
-    );
+    // Role gates are enforced server-side; assert them through the browser
+    // session (page.request shares the context cookie jar).
+    const operator = await page.request.get(`${BACKEND}/api/protected/operator`);
+    expect(operator.ok()).toBe(true);
+    expect((await operator.json()).message).toContain('Operator-level resource accessed.');
 
-    await page.getByTestId('call-admin').click();
-    await expect(page.locator('.alert.error', { hasText: /does not permit/i })).toBeVisible();
+    const admin = await page.request.get(`${BACKEND}/api/protected/admin`);
+    expect(admin.status()).toBe(403);
+    expect((await admin.json()).message).toMatch(/does not permit/i);
   });
 
   test('ADMIN can call the admin endpoint', async ({ page }) => {
     await installProvider(page, ACCOUNT.ADMIN_0);
     await authenticated(page, ACCOUNT.ADMIN_0);
 
-    await page.getByTestId('call-admin').click();
-    await expect(page.locator('[data-testid="protected-card"] .alert.notice')).toContainText(
-      'Admin-level resource accessed.',
-    );
+    const admin = await page.request.get(`${BACKEND}/api/protected/admin`);
+    expect(admin.ok()).toBe(true);
+    expect((await admin.json()).message).toContain('Admin-level resource accessed.');
     await expect(page.getByTestId('session-role')).toHaveText('ADMIN');
   });
 

@@ -84,6 +84,12 @@ export const api = {
   revokeIdentity: (address: string) =>
     request<{ revoked: boolean }>(`/admin/identities/${address}`, { method: 'DELETE' }),
 
+  setRoleIdentity: (address: string, role: 'USER' | 'OPERATOR' | 'ADMIN') =>
+    request<{ updated: boolean; walletAddress: string; role: string }>(
+      `/admin/identities/${address}`,
+      { method: 'PATCH', body: JSON.stringify({ role }) },
+    ),
+
   clientEvent: (
     event: 'ACCOUNT_CHANGED' | 'CHAIN_CHANGED',
     payload: { walletAddress?: string; chainId?: number; detail?: string },
