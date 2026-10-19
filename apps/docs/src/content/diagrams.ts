@@ -51,6 +51,7 @@ export const AUTH_SEQUENCE = `sequenceDiagram
   B-->>F: chainId · domain · URI · TTLs
   F->>W: eth_requestAccounts + eth_chainId
   W-->>F: address + chainId
+  Note over F,W: chainId != config -> wrong_network<br/>UI offers wallet_switchEthereumChain(1337)
   F->>B: POST /auth/nonce { address }
   B->>DB: INSERT Nonce (single-use, TTL 300s)
   B-->>F: { nonce, expiresAt }
@@ -81,12 +82,12 @@ export const FRONTEND_STATE_MACHINE = `stateDiagram-v2
   waiting_for_signature --> verifying
   verifying --> authenticated: /auth/verify 200
   verifying --> auth_failed: pipeline error
-  connected --> wrong_network: chainId != config
-  authenticated --> wrong_network: chainChanged
+  connected --> wrong_network: connect() with chainId != config
+  authenticated --> wrong_network: chainChanged to another chain
+  wrong_network --> connected: switchNetwork() / chainChanged on expected chain
   authenticated --> disconnected: accountsChanged / logout()
   authenticated --> session_expired: /auth/me 401
-  wrong_network --> disconnected: switch network
-  session_expired --> disconnected: sign in again`;
+  session_expired --> requesting_nonce: signIn() again`;
 
 export const DATA_MODEL = `erDiagram
   User ||--o{ Session : authenticates

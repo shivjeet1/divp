@@ -33,7 +33,7 @@ export const TEST_MATRIX: TestSuite[] = [
     suite: 'End-to-end · Playwright',
     command: 'npm run test:e2e',
     count: '14',
-    what: 'Real browser: connect → sign → protected API → logout; 8 API attack demos; self-registration.',
+    what: 'Real browser: connect → sign → protected API → logout, role gates, self-registration, account/network switches; plus 6 direct API attack demos.',
   },
   {
     suite: 'Live smoke · node',
@@ -68,7 +68,7 @@ export const TEST_LAYERS: TestLayer[] = [
   {
     layer: 'Browser E2E',
     detail:
-      'Playwright injects a provider and exercises the full pipeline in a real browser, plus direct HTTP attacks against the running backend.',
+      'Playwright injects a provider and exercises the full pipeline in a real browser; role gates are replayed with the browser session cookie against the operator/admin routes, and direct HTTP attacks run against the running backend.',
   },
   {
     layer: 'Live smoke',

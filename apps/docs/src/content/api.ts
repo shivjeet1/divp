@@ -73,7 +73,7 @@ export const ENDPOINTS: Endpoint[] = [
   "expiresAt": "2026-10-08T12:05:00.000Z",
   "ttlSeconds": 300
 }`,
-    errors: ['VALIDATION_ERROR (400)', 'INVALID_ADDRESS (400)', 'RATE_LIMITED (429)'],
+    errors: ['VALIDATION_ERROR (400)', 'RATE_LIMITED (429)'],
   },
   {
     id: 'verify',
@@ -166,6 +166,12 @@ export const ENDPOINTS: Endpoint[] = [
     group: 'Protected',
     auth: 'OPERATOR or ADMIN',
     summary: 'Operator-gated resource. Rejects with ROLE_FORBIDDEN (403) otherwise.',
+    response: `{
+  "authenticated": true,
+  "walletAddress": "0x3C44...",
+  "role": "OPERATOR",
+  "message": "Operator-level resource accessed."
+}`,
   },
   {
     id: 'protected-admin',
@@ -174,6 +180,12 @@ export const ENDPOINTS: Endpoint[] = [
     group: 'Protected',
     auth: 'ADMIN',
     summary: 'Admin-gated resource. Rejects with ROLE_FORBIDDEN (403) otherwise.',
+    response: `{
+  "authenticated": true,
+  "walletAddress": "0xf39F...",
+  "role": "ADMIN",
+  "message": "Admin-level resource accessed."
+}`,
   },
   {
     id: 'admin-list',
@@ -196,9 +208,10 @@ export const ENDPOINTS: Endpoint[] = [
     path: '/admin/identities',
     group: 'Admin',
     auth: 'ADMIN',
-    summary: 'Register an identity on-chain (admin-signed). Audits IDENTITY_AUTHORIZED.',
+    summary:
+      'Register an identity on-chain (admin-signed, 201). Re-registering a revoked wallet restores it with the given role. Audits IDENTITY_AUTHORIZED.',
     request: `{ "address": "0x...", "role": "USER" }`,
-    response: `{ "created": true }`,
+    response: `{ "created": true, "walletAddress": "0x...", "role": "USER" }`,
   },
   {
     id: 'admin-patch',
@@ -209,7 +222,7 @@ export const ENDPOINTS: Endpoint[] = [
     summary:
       'Change an identity role (admin-signed) and revoke the wallet’s active Web2 sessions immediately.',
     request: `{ "role": "OPERATOR" }`,
-    response: `{ "updated": true }`,
+    response: `{ "updated": true, "walletAddress": "0x...", "role": "OPERATOR" }`,
   },
   {
     id: 'admin-revoke',
@@ -219,13 +232,12 @@ export const ENDPOINTS: Endpoint[] = [
     auth: 'ADMIN',
     summary:
       'Revoke (inactivate) an identity (admin-signed) and revoke the wallet’s active Web2 sessions immediately.',
-    response: `{ "revoked": true }`,
+    response: `{ "revoked": true, "walletAddress": "0x..." }`,
   },
 ];
 
 export const ERROR_CODES: ErrorCode[] = [
   { code: 'VALIDATION_ERROR', status: 400, meaning: 'Request body failed zod validation' },
-  { code: 'INVALID_ADDRESS', status: 400, meaning: 'Address is not valid EIP-55 / missing 0x' },
   {
     code: 'NONCE_NOT_FOUND / NONCE_ALREADY_USED / NONCE_EXPIRED',
     status: 401,
@@ -233,14 +245,14 @@ export const ERROR_CODES: ErrorCode[] = [
   },
   { code: 'SIWE_MALFORMED', status: 401, meaning: 'Message does not parse as EIP-4361' },
   {
-    code: 'SIWE_DOMAIN_MISMATCH / SIWE_URI_MISMATCH / SIWE_CHAIN_MISMATCH / SIWE_VERSION_MISMATCH',
+    code: 'SIWE_DOMAIN_MISMATCH / SIWE_URI_MISMATCH / SIWE_CHAIN_MISMATCH',
     status: 401,
     meaning: 'Message contradicts backend config',
   },
   {
-    code: 'SIWE_EXPIRED / SIWE_ISSUED_AT_INVALID / SIWE_NONCE_MISMATCH / SIWE_ADDRESS_MISMATCH',
+    code: 'SIWE_EXPIRED / SIWE_ISSUED_AT_INVALID / SIWE_NONCE_MISMATCH',
     status: 401,
-    meaning: 'Time / nonce / address binding violations',
+    meaning: 'Time / nonce violations',
   },
   {
     code: 'SIGNATURE_INVALID / SIGNATURE_MALFORMED',
@@ -263,7 +275,7 @@ export const ERROR_CODES: ErrorCode[] = [
     meaning: 'RPC/contract not reachable (controlled degradation)',
   },
   {
-    code: 'AUTH_REQUIRED / TOKEN_MISSING / TOKEN_INVALID / TOKEN_EXPIRED / TOKEN_SIGNATURE_INVALID / TOKEN_CLAIM_INVALID',
+    code: 'AUTH_REQUIRED / TOKEN_INVALID / TOKEN_EXPIRED / TOKEN_SIGNATURE_INVALID / TOKEN_CLAIM_INVALID',
     status: 401,
     meaning: 'JWT / session token problems',
   },

@@ -28,7 +28,7 @@ export const SECTIONS: Section[] = [
     id: 'flows',
     label: 'State & flows',
     group: 'Flows',
-    blurb: 'Frontend state machine, admin writes and self-registration.',
+    blurb: 'Frontend state machine, dashboard surfaces, admin writes and self-registration.',
   },
   {
     id: 'api',

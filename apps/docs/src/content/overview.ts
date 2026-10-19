@@ -33,7 +33,7 @@ export const STACK: StackLayer[] = [
   {
     layer: 'Frontend',
     tech: 'Next.js 15 · React 19 · ethers',
-    role: 'Wallet connect, SIWE message building, auth state machine, protected cards.',
+    role: 'Wallet connect, SIWE message building, auth state machine, wrong-network switch, and a role-aware dashboard (session, self-registration, protected API, ADMIN registry console).',
   },
   {
     layer: 'Backend',
@@ -70,7 +70,7 @@ export const REPO_LAYOUT: RepoRow[] = [
   },
   {
     path: 'apps/frontend/',
-    what: 'Next.js app (wallet connect, SIWE flow, protected cards) + tests',
+    what: 'Next.js app (wallet connect, SIWE flow, role-aware dashboard, admin console) + tests',
   },
   { path: 'apps/docs/', what: 'This documentation & visualization portal (Vite, port 5173)' },
   { path: 'prisma/', what: 'PostgreSQL schema + migrations (Nonce, Session, User, AuditLog)' },
