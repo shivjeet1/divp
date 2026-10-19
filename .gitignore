@@ -93,3 +93,7 @@ tmp/
 /docs/architecture.md
 /docs/security-testing.md
 /docs/threat-model.md
+# image attachments pasted into the internal docs
+/docs/*.jpeg
+/docs/*.jpg
+/docs/*.png
