@@ -79,6 +79,9 @@ tmp/
 *.pid
 *.tgz
 
+# LaTeX scratch/reference files (docs/ and repo root) — never committed
+*.tex
+
 # ===========================================================================
 # Internal documents — intentionally kept out of the repository.
 # The files remain on your disk; git simply does not track them.
