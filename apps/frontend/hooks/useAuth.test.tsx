@@ -122,11 +122,11 @@ function createSimBackend() {
     if (path === '/auth/nonce' && method === 'POST') {
       const { address } = JSON.parse(String(init.body)) as { address: string };
       if (!/^0x[0-9a-fA-F]{40}$/.test(address)) {
-        return json(400, { error: 'INVALID_ADDRESS', message: 'Invalid wallet address.' });
+        return json(400, { error: 'VALIDATION_ERROR', message: 'Invalid wallet address.' });
       }
       const nonce = `sim-nonce-${Math.random().toString(36).slice(2, 12)}`;
       issuedNonces.set(nonce, address.toLowerCase());
-      return json(201, {
+      return json(200, {
         address,
         nonce,
         expiresAt: new Date(Date.now() + 300_000).toISOString(),
@@ -157,7 +157,7 @@ function createSimBackend() {
         return json(401, { error: 'SIGNER_MISMATCH', message: 'Wrong wallet.' });
       }
       if (!message.includes('localhost:3000 wants you to sign in')) {
-        return json(401, { error: 'DOMAIN_MISMATCH', message: 'Wrong domain.' });
+        return json(401, { error: 'SIWE_DOMAIN_MISMATCH', message: 'Wrong domain.' });
       }
       const role = REGISTRY.get(recovered.toLowerCase());
       if (!role) {
@@ -174,7 +174,7 @@ function createSimBackend() {
         expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
         authenticated: true,
       };
-      return json(201, session);
+      return json(200, session);
     }
 
     if (path === '/auth/me' && method === 'GET') {
