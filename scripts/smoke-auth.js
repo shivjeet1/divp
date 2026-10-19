@@ -5,7 +5,8 @@
  *
  * Usage: node scripts/smoke-auth.js [--chain 1337] [--domain evil.example]
  */
-const { Wallet, HDNodeWallet, Mnemonic, getBytes, hexlify } = require('ethers');
+const { HDNodeWallet } = require('ethers');
+const { randomBytes } = require('crypto');
 
 const BACKEND = process.env.BACKEND_URL ?? 'http://localhost:4000';
 const MNEMONIC = 'test test test test test test test test test test test junk';
@@ -79,7 +80,7 @@ async function signSiwe(wallet, overrides = {}) {
     nonce: overrides.nonce ?? nonceRes.nonce,
     issuedAt,
     expirationTime,
-    requestId: overrides.requestId ?? `req-${hexlify(getBytes(new Uint8Array(8)))}`,
+    requestId: overrides.requestId ?? randomBytes(8).toString('hex'),
   });
   const signature = await wallet.signMessage(message);
   return { message, signature, nonceRes };
