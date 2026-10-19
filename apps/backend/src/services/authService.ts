@@ -83,9 +83,7 @@ export const authService = {
       });
 
       // 8. Create the Web2 session (JWT + server-side record)
-      const session = await sessionService.create(wallet, role, ctx);
-
-      return { ...session, claims: session.claims };
+      return sessionService.create(wallet, role, ctx);
     } catch (error) {
       const code = error instanceof AppError ? error.code : 'INTERNAL_ERROR';
       await recordAudit(AuditEvent.SIGNATURE_VERIFICATION_FAILED, {

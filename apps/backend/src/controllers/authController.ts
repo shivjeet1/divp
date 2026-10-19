@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { config } from '../config';
 import { prisma } from '../prisma';
-import { errors } from '../errors/AppError';
+import { AppError } from '../errors/AppError';
 import { isValidAddress, checksumAddress } from '../utils/address';
 import { nonceService } from '../services/nonceService';
 import { authService } from '../services/authService';
@@ -142,7 +142,7 @@ export const register = async (req: Request, res: Response, next: NextFunction):
 
 export const me = (req: Request, res: Response): void => {
   const identity = req.identity;
-  if (!identity) throw errors.authRequired();
+  if (!identity) throw new AppError('AUTH_REQUIRED', 401, 'Authentication is required.');
   res.json({
     authenticated: true,
     walletAddress: checksumAddress(identity.sub),
@@ -156,7 +156,7 @@ export const me = (req: Request, res: Response): void => {
 export const logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const identity = req.identity;
-    if (!identity) throw errors.authRequired();
+    if (!identity) throw new AppError('AUTH_REQUIRED', 401, 'Authentication is required.');
 
     const ctx = { ipAddress: req.clientIp, userAgent: req.clientUserAgent };
     const { sessionService } = await import('../services/sessionService');

@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express';
-import { AppError, errors } from '../errors/AppError';
+import { AppError } from '../errors/AppError';
 import { config } from '../config';
 import { sessionService } from '../services/sessionService';
 
@@ -12,7 +12,7 @@ export function requireAuth(): RequestHandler {
   return async (req: Request, _res: Response, next: NextFunction) => {
     try {
       const token = req.cookies?.[config.cookie.name];
-      if (!token) throw errors.authRequired('No session cookie was provided.');
+      if (!token) throw new AppError('AUTH_REQUIRED', 401, 'No session cookie was provided.');
 
       const ctx = { ipAddress: req.clientIp, userAgent: req.clientUserAgent };
       const claims = await sessionService.verify(token, ctx);
@@ -49,7 +49,7 @@ export function requireAuth(): RequestHandler {
 export function requireRole(...roles: Array<'USER' | 'OPERATOR' | 'ADMIN'>): RequestHandler {
   return (req, _res, next) => {
     const identity = req.identity;
-    if (!identity) return next(errors.authRequired());
+    if (!identity) return next(new AppError('AUTH_REQUIRED', 401, 'Authentication is required.'));
     if (!roles.includes(identity.role as 'USER' | 'OPERATOR' | 'ADMIN')) {
       return next(new AppError('ROLE_FORBIDDEN', 403, 'Your role does not permit this operation.'));
     }

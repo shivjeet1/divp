@@ -1,3 +1,4 @@
+import type { Prisma } from '@prisma/client';
 import { prisma } from '../prisma';
 
 /**
@@ -28,7 +29,7 @@ export interface AuditContext {
   walletAddress?: string | null;
   ipAddress?: string | null;
   userAgent?: string | null;
-  metadata?: Record<string, unknown>;
+  metadata?: Prisma.InputJsonValue;
 }
 
 export async function recordAudit(event: AuditEventName, ctx: AuditContext = {}): Promise<void> {
@@ -39,7 +40,7 @@ export async function recordAudit(event: AuditEventName, ctx: AuditContext = {})
         walletAddress: ctx.walletAddress ? ctx.walletAddress.toLowerCase() : null,
         ipAddress: ctx.ipAddress ?? null,
         userAgent: ctx.userAgent ? ctx.userAgent.slice(0, 512) : null,
-        metadata: ctx.metadata ? (ctx.metadata as never) : undefined,
+        metadata: ctx.metadata,
       },
     });
   } catch (error) {

@@ -122,26 +122,21 @@ export const adminRegistry = {
   async register(walletAddress: string, role: RoleName): Promise<void> {
     const contract = adminContract();
     const roleValue = ROLE_NAMES.indexOf(role);
-    await runAdminTx(
-      'registerIdentity',
-      () => contract.registerIdentity(normalizeAddress(walletAddress), roleValue) as never,
+    await runAdminTx('registerIdentity', () =>
+      contract.registerIdentity(normalizeAddress(walletAddress), roleValue),
     );
   },
 
   async setRole(walletAddress: string, role: RoleName): Promise<void> {
     const contract = adminContract();
     const roleValue = ROLE_NAMES.indexOf(role);
-    await runAdminTx(
-      'setRole',
-      () => contract.setRole(normalizeAddress(walletAddress), roleValue) as never,
-    );
+    await runAdminTx('setRole', () => contract.setRole(normalizeAddress(walletAddress), roleValue));
   },
 
   async revoke(walletAddress: string): Promise<void> {
     const contract = adminContract();
-    await runAdminTx(
-      'revokeIdentity',
-      () => contract.revokeIdentity(normalizeAddress(walletAddress)) as never,
+    await runAdminTx('revokeIdentity', () =>
+      contract.revokeIdentity(normalizeAddress(walletAddress)),
     );
   },
 };

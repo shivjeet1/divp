@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
 import { adminRegistry } from '../blockchain/adminRegistry';
 import { isValidAddress, checksumAddress } from '../utils/address';
 import { recordAudit, type AuditEventName } from '../services/auditService';
@@ -25,7 +26,11 @@ const AddressParam = z.object({
   address: z.string().refine(isValidAddress, 'A valid Ethereum address is required.'),
 });
 
-function auditAdmin(req: Request, action: AuditEventName, metadata: Record<string, unknown>): void {
+function auditAdmin(
+  req: Request,
+  action: AuditEventName,
+  metadata: Record<string, Prisma.InputJsonValue>,
+): void {
   void recordAudit(action, {
     walletAddress: req.identity?.sub,
     ipAddress: req.clientIp,
