@@ -15,6 +15,9 @@ MetaMask ──SIWE message + signature──▶ Express backend ──reads─�
 Nothing is mocked: real ECDSA recovery, real HMAC-SHA256 JWTs built with Node's
 native `crypto`, real contract calls, real database transactions.
 
+## Youtube Demo Link :
+
+[Demo Link](https://youtu.be/b_eJo0jXJpw?si=-F1VBWGSIkcI840P)
 ## Run it
 
 Requires Node ≥ 20 and Docker (for PostgreSQL).
